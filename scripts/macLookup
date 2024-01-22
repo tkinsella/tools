@@ -2,6 +2,7 @@
 
 # Initialize variables
 show_json=false
+mac_input=""
 
 # Process command line arguments
 while getopts "j" opt; do
@@ -10,7 +11,7 @@ while getopts "j" opt; do
       show_json=true
       ;;
     \?)
-      echo "Usage: $0 [-j] (optional: -j to show JSON output)"
+      echo "Usage: $0 [-j] (optional: -j to show JSON output) [MAC input]"
       exit 1
       ;;
   esac
@@ -19,8 +20,15 @@ done
 # Shift the command line arguments
 shift $((OPTIND-1))
 
-# Ask the user for the first 6 characters of the MAC address
-read -p "Enter the first 6 characters of the MAC address (in XX:XX:XX or XXXXXX format): " mac_input
+# Check if MAC input is provided as an argument
+if [ $# -eq 1 ]; then
+  mac_input="$1"
+fi
+
+# If MAC input is not provided, ask the user for it
+if [ -z "$mac_input" ]; then
+  read -p "Enter the first 6 characters of the MAC address (in XX:XX:XX or XXXXXX format): " mac_input
+fi
 
 # Remove any ":" from the input
 mac_input_cleaned=$(echo "$mac_input" | tr -d ':')
@@ -43,3 +51,4 @@ if [ "$show_json" = true ]; then
   echo "JSON Output:"
   echo "$mac_vendor_info"
 fi
+
