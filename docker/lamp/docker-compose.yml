@@ -1,0 +1,46 @@
+version: '3.0'
+name: $APPNAME
+
+services:
+ php_webserver:
+  build:
+   context: .
+   dockerfile: Dockerfile
+  ports:
+   - 80:80
+  volumes:
+   - ./:/var/www/html
+  depends_on:
+   - mariadb
+  networks:
+   - $APPNAME_network
+
+ mariadb:
+  image: mariadb
+  restart: always
+  environment:
+   MYSQL_ROOT_PASSWORD: rootpass
+   MYSQL_DATABASE: $APPNAME
+   MYSQL_USER: $APPNAME
+   MYSQL_PASSWORD: $SQLPASS
+  volumes:
+   - ./database:/docker-entrypoint-initdb.d
+  networks:
+   - $APPNAME
+  ports:
+   - 3306:3306
+
+ phpmyadmin:
+  image: phpmyadmin/phpmyadmin
+  environment:
+   PMA_ARBITRARY: 1
+  ports:
+   - "8080:80"
+  depends_on:
+   - mariadb
+  networks:
+   - $APPNAME
+
+networks:
+ $APPNAME:
+  driver: bridge
