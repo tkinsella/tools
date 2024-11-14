@@ -1,3 +1,59 @@
+#!/usr/bin/env python3
+"""
+=============================================================================
+File:           subnet.py
+Purpose:        A network utility that performs subnet calculations based on
+               CIDR notation or netmask input. Provides comprehensive subnet
+               information including IP ranges, host counts, and decimal
+               conversions in both human-readable and JSON formats.
+
+How to run:     python subnet.py [CIDR/netmask]
+               Examples:
+                   python subnet.py 192.168.1.0/24
+                   python subnet.py 255.255.255.0
+               If no argument provided, script will prompt for input.
+
+Dependencies:   Python 3.6+
+               - ipaddress
+               - sys
+               - datetime
+               - json
+
+Author:         Tom Kinsella
+Email:          tkinsella@sisng.io
+Organization:   Personal Project
+
+Creation Date:  2021-12-04
+Last Updated:   2021-12-04
+Version:        1.0.0
+
+Change History:
+   1.0.0 (2021-12-04) - Initial release
+       - Support for both CIDR and netmask input formats
+       - Comprehensive subnet calculations including:
+           * Network/Broadcast addresses
+           * Total/Usable host counts
+           * Decimal IP conversions
+           * Wildcard bits
+       - Dual output formats:
+           * Human-readable table
+           * Formatted JSON
+       - Input validation and error handling
+       - Interactive mode when no arguments provided
+       - Timestamp inclusion in output
+
+License:        MIT License
+               Copyright (c) 2024 Tom Kinsella
+               See LICENSE file for full license text
+
+Notes:
+   - Supports IPv4 addresses only
+   - All calculations use the ipaddress module for accuracy
+   - Assumes input is either CIDR notation or dotted decimal netmask
+   - Network and broadcast addresses are included in total host count
+=============================================================================
+"""
+
 import ipaddress
 import sys
 import datetime
