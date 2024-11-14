@@ -1,7 +1,7 @@
 #!/bin/bash
 """
 =============================================================================
-File:           mac_vendor_lookup.sh
+File:           macLookup.sh
 Purpose:        A command-line tool that identifies the vendor/manufacturer
                of network interface cards based on their MAC address prefix.
                Uses the macvendorlookup.com API to perform the lookup.
