@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 =============================================================================
-File:           nmap_parser.py
+File:           nmapFormat.py
 Purpose:        Parses nmap scan output from stdin and converts it into a
                clean, formatted table using pandas. Extracts IP addresses,
                ports, protocols, states and services from nmap scan results.
