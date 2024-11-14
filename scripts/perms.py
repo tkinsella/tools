@@ -1,3 +1,52 @@
+#!/usr/bin/env python3
+"""
+=============================================================================
+File:           perms.py
+Purpose:        A utility script for converting Linux file permissions between
+               numeric (octal) and symbolic notations. Supports bidirectional
+               conversion and provides detailed permission breakdowns for 
+               user, group, and others.
+
+How to run:     python perms.py [permission]
+               Examples:
+                   python perms.py 755
+                   python perms.py rwxr-xr-x
+               If no argument provided, script will prompt for input.
+
+Dependencies:   Python 3.6+
+               - sys
+
+Author:         Tom Kinsella
+Email:          tkinsella@sisng.io
+Organization:   Personal Project
+
+Creation Date:  2018-09-04
+Last Updated:   2018-09-04
+Version:        1.0.0
+
+Change History:
+   1.0.0 (2018-09-04) - Initial release
+       - Bidirectional conversion between numeric and symbolic notations
+       - Support for standard Linux permission formats:
+           * Numeric (octal): 3 digits (e.g., 755)
+           * Symbolic: 9 characters (e.g., rwxr-xr-x)
+       - Detailed permission breakdown for numeric input:
+           * User permissions
+           * Group permissions
+           * Others permissions
+       - Input validation for both formats
+       - Interactive mode when no arguments provided
+
+License:        MIT License
+               Copyright (c) 2024 Tom Kinsella
+               See LICENSE file for full license text
+
+Notes:
+   - Handles standard Linux permission formats only
+   - Does not support special permissions (setuid, setgid, sticky bit)
+   - Input must be either 3-digit octal or 9-character symbolic notation
+=============================================================================
+"""
 def numeric_to_symbolic(numeric_perm):
     numeric_perm = int(numeric_perm, 8)
     symbolic_perm = ''
