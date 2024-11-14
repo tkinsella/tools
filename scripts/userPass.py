@@ -1,3 +1,57 @@
+#!/usr/bin/env python3
+"""
+=============================================================================
+File:           userPass.py
+Purpose:        Generates secure usernames and passwords following specific
+               formatting rules. Usernames follow XX000000 format, and 
+               passwords are 16 characters with specific character type
+               requirements while avoiding ambiguous characters.
+
+How to run:     python userPass.py
+               Outputs generated username and password with analysis of
+               password composition.
+
+Dependencies:   Python 3.6+
+               - random
+               - string
+
+Author:         Tom Kinsella
+Email:          tkinsella@sisng.io
+Organization:   Personal Project
+
+Creation Date:  2019-02-12
+Last Updated:   2019-02-12
+Version:        1.0.0
+
+Change History:
+   1.0.0 (2019-02-12) - Initial release
+       - Username generation:
+           * Format: XX000000 (2 uppercase + 6 digits)
+           * Excludes ambiguous characters (I, O, 0)
+       - Password generation:
+           * 16 characters in length
+           * 3-5 uppercase letters
+           * Minimum 3 numbers
+           * Minimum 3 symbols
+           * Remaining characters randomly selected
+           * Excludes similar-looking characters
+       - Password verification system
+       - Detailed password analysis output
+       - Object-oriented design with CredentialGenerator class
+
+License:        MIT License
+               Copyright (c) 2024 Tom Kinsella
+               See LICENSE file for full license text
+
+Notes:
+   - Excludes similar-looking characters (I, O, 0, l)
+   - Passwords always contain minimum required characters
+   - Uses cryptographically secure random number generator
+   - Includes verification to ensure all requirements are met
+   - Recursively generates new password if requirements not met
+=============================================================================
+"""
+
 import random
 import string
 
