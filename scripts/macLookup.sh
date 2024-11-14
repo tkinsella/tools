@@ -6,13 +6,13 @@ Purpose:        A command-line tool that identifies the vendor/manufacturer
                of network interface cards based on their MAC address prefix.
                Uses the macvendorlookup.com API to perform the lookup.
 
-How to run:     ./mac_vendor_lookup.sh [-j] [MAC]
+How to run:     ./macLookup.sh [-j] [MAC]
                Options:
                    -j: Display full JSON response
                    MAC: First 6 characters of MAC address (XX:XX:XX or XXXXXX)
                Example: 
-                   ./mac_vendor_lookup.sh -j 00:50:56
-                   ./mac_vendor_lookup.sh 005056
+                   ./macLookup.sh -j 00:50:56
+                   ./macLookup.sh 005056
 
 Dependencies:   - curl
                - jq (for JSON parsing)
