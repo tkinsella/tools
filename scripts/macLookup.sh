@@ -1,4 +1,49 @@
 #!/bin/bash
+"""
+=============================================================================
+File:           mac_vendor_lookup.sh
+Purpose:        A command-line tool that identifies the vendor/manufacturer
+               of network interface cards based on their MAC address prefix.
+               Uses the macvendorlookup.com API to perform the lookup.
+
+How to run:     ./mac_vendor_lookup.sh [-j] [MAC]
+               Options:
+                   -j: Display full JSON response
+                   MAC: First 6 characters of MAC address (XX:XX:XX or XXXXXX)
+               Example: 
+                   ./mac_vendor_lookup.sh -j 00:50:56
+                   ./mac_vendor_lookup.sh 005056
+
+Dependencies:   - curl
+               - jq (for JSON parsing)
+               - Internet connection for API access
+
+Author:         Tom Kinsella
+Email:          tkinsella@sisng.io
+Organization:   Personal Project
+
+Creation Date:  2023-07-14
+Last Updated:   2023-07-14
+Version:        1.0.0
+
+Change History:
+   1.0.0 (2023-07-14) - Initial release
+       - Basic MAC vendor lookup functionality
+       - Support for both XX:XX:XX and XXXXXX formats
+       - Optional JSON output display (-j flag)
+       - Interactive mode when no MAC provided
+       - Integration with macvendorlookup.com API v2
+
+License:        MIT License
+               Copyright (c) 2024 Tom Kinsella
+               See LICENSE file for full license text
+
+Notes:
+   - Requires valid MAC address prefix (first 6 characters)
+   - Requires internet connection to access API
+   - Rate limits may apply from API provider
+=============================================================================
+"""
 
 # Initialize variables
 show_json=false
