@@ -6,9 +6,9 @@ Purpose:        Parses nmap scan output from stdin and converts it into a
                clean, formatted table using pandas. Extracts IP addresses,
                ports, protocols, states and services from nmap scan results.
 
-How to run:     nmap [options] target | python nmap_parser.py
+How to run:    nmap [options] target | python nmapFormat.py
                Example:
-               nmap -p- 192.168.1.0/24 | python nmap_parser.py 
+               nmap -p- 192.168.1.0/24 | python nmapFormat.py 
 
 Dependencies:   Python 3.6+
                - sys
