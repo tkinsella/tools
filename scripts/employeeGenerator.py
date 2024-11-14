@@ -1,3 +1,41 @@
+"""
+=============================================================================
+File:           employeeGenerator.py
+Purpose:        Generates synthetic employee data for testing and development
+                purposes. Creates 50 random employee profiles with realistic
+                personal information including names, addresses, SSNs, and
+                other demographic data.
+
+How to run:     python employeeGenerator.py
+                Output is printed to stdout and can be redirected to a file:
+                python employeeGenerator.py > employees.csv
+
+Dependencies:   Python 3.6+
+                - random
+                - datetime
+                - string
+
+Author:         Tom Kinsella
+Email:          tkinsella@sisng.io
+Organization:   Private Project
+
+Creation Date:  2024-10-26
+Last Updated:   2024-10-26
+Version:        1.0.1
+
+License:        MIT License
+                Copyright (c) 2024 [Your Name]
+                See LICENSE file for full license text
+
+Notes:
+    - Generates 50 unique employee profiles
+    - All data is randomly generated and not based on real persons
+    - Date ranges:
+        * Birth dates: 65 to 18 years from current date
+        * Start dates: 2024-01-01 to 2024-10-26
+=============================================================================
+"""
+
 import random
 from datetime import datetime, timedelta
 import string
