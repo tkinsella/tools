@@ -1,0 +1,240 @@
+<?php
+// includes/config.inc.php - Database configuration
+$host = 'localhost';
+$dbname = 'user_registration';
+$username = 'root';
+$password = '';
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+    echo "Connection failed: " . $e->getMessage();
+    die();
+}
+
+// Create users table if it doesn't exist
+$sql = "CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+
+try {
+    $pdo->exec($sql);
+} catch(PDOException $e) {
+    echo "Table creation failed: " . $e->getMessage();
+    die();
+}
+?>
+
+<?php
+// register.php - Registration form and processing
+session_start();
+require_once './includes/config.inc.php';
+
+$errors = [];
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+
+    // Validation
+    if (empty($username)) {
+        $errors[] = "Username is required";
+    }
+    if (empty($email)) {
+        $errors[] = "Email is required";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Invalid email format";
+    }
+    if (empty($password)) {
+        $errors[] = "Password is required";
+    } elseif (strlen($password) < 6) {
+        $errors[] = "Password must be at least 6 characters";
+    }
+    if ($password !== $confirm_password) {
+        $errors[] = "Passwords do not match";
+    }
+
+    // Check if username or email already exists
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
+    $stmt->execute([$username, $email]);
+    if ($stmt->rowCount() > 0) {
+        $errors[] = "Username or email already exists";
+    }
+
+    // If no errors, proceed with registration
+    if (empty($errors)) {
+        try {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+            $stmt->execute([$username, $email, $hashed_password]);
+            
+            $_SESSION['success'] = "Registration successful! Please login.";
+            header("Location: login.php");
+            exit();
+        } catch(PDOException $e) {
+            $errors[] = "Registration failed: " . $e->getMessage();
+        }
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Registration</title>
+</head>
+<body>
+    <h2>Register</h2>
+    
+    <?php if (!empty($errors)): ?>
+        <div style="color: red;">
+            <?php foreach ($errors as $error): ?>
+                <p><?php echo htmlspecialchars($error); ?></p>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
+    <form method="POST" action="">
+        <div>
+            <label>Username:</label>
+            <input type="text" name="username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
+        </div>
+        
+        <div>
+            <label>Email:</label>
+            <input type="email" name="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+        </div>
+        
+        <div>
+            <label>Password:</label>
+            <input type="password" name="password">
+        </div>
+        
+        <div>
+            <label>Confirm Password:</label>
+            <input type="password" name="confirm_password">
+        </div>
+        
+        <div>
+            <input type="submit" value="Register">
+        </div>
+    </form>
+    
+    <p>Already have an account? <a href="login.php">Login here</a></p>
+</body>
+</html>
+
+<?php
+// login.php - Login form and processing
+session_start();
+require_once './includes/config.php';
+
+$errors = [];
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = trim($_POST['username']);
+    $password = $_POST['password'];
+
+    if (empty($username) || empty($password)) {
+        $errors[] = "Both username and password are required";
+    } else {
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+        $stmt->execute([$username]);
+        $user = $stmt->fetch();
+
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            header("Location: dashboard.php");
+            exit();
+        } else {
+            $errors[] = "Invalid username or password";
+        }
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    
+    <?php if (isset($_SESSION['success'])): ?>
+        <div style="color: green;">
+            <?php 
+            echo htmlspecialchars($_SESSION['success']);
+            unset($_SESSION['success']);
+            ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($errors)): ?>
+        <div style="color: red;">
+            <?php foreach ($errors as $error): ?>
+                <p><?php echo htmlspecialchars($error); ?></p>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
+    <form method="POST" action="">
+        <div>
+            <label>Username:</label>
+            <input type="text" name="username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
+        </div>
+        
+        <div>
+            <label>Password:</label>
+            <input type="password" name="password">
+        </div>
+        
+        <div>
+            <input type="submit" value="Login">
+        </div>
+    </form>
+    
+    <p>Don't have an account? <a href="register.php">Register here</a></p>
+</body>
+</html>
+
+<?php
+// dashboard.php - Protected page example
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h2>
+    
+    <p>This is your dashboard. You're successfully logged in!</p>
+    
+    <a href="logout.php">Logout</a>
+</body>
+</html>
+
+<?php
+// logout.php - Logout functionality
+session_start();
+session_destroy();
+header("Location: login.php");
+exit();
+?>
