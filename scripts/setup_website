@@ -1,0 +1,168 @@
+#!/bin/bash
+
+# Function to generate a random password
+generate_password() {
+    openssl rand -base64 12
+}
+
+# Function to create index.php
+create_index_php() {
+    local domain=$1
+    local db_name=$2
+    local db_user=$3
+    local db_pass=$4
+    local doc_root=$5
+
+    cat > "${doc_root}/index.php" <<EOL
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${domain} - Site Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .info-box {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .success {
+            color: #27ae60;
+        }
+        .error {
+            color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to ${domain}</h1>
+    <div class="info-box">
+        <p>This is a placeholder page for your new website.</p>
+<?php
+        \$host = 'localhost';
+        \$dbname = '${db_name}';
+        \$username = '${db_user}';
+        \$password = '${db_pass}';
+
+        try {
+            \$pdo = new PDO("mysql:host=\$host;dbname=\$dbname", \$username, \$password);
+            \$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            \$stmt = \$pdo->query("SELECT version FROM schema_version");
+            \$version = \$stmt->fetchColumn();
+
+            echo "<p class='success'>Database connection successful.</p>";
+            echo "<p>Current version: " . htmlspecialchars(\$version) . "</p>";
+        } catch(PDOException \$e) {
+            echo "<p class='error'>Database connection failed: " . htmlspecialchars(\$e->getMessage()) . "</p>";
+        }
+        ?>
+    </div>
+</body>
+</html>
+EOL
+}
+
+# Prompt user for domain name
+read -p "Enter the domain name (without www): " domain
+
+# Generate config file path
+config_file="/etc/apache2/sites-available/${domain}.conf"
+
+# Generate document root path
+doc_root="/var/www/html/${domain}"
+
+# Generate MySQL credentials
+db_name="${domain//./_}"
+db_user="${domain//./_}_user"
+db_pass=$(generate_password)
+
+# 1. Create Apache config file
+cat > "$config_file" <<EOL
+<VirtualHost *:80>
+    ServerName ${domain}
+    DocumentRoot ${doc_root}
+    ErrorLog \${APACHE_LOG_DIR}/${domain}_error.log
+    CustomLog \${APACHE_LOG_DIR}/${domain}_access.log combined
+</VirtualHost>
+EOL
+
+# 2. Create document root
+sudo mkdir -p "$doc_root"
+
+# Create index.php
+create_index_php "$domain" "$db_name" "$db_user" "$db_pass" "$doc_root"
+
+# 3. Create MySQL database, user, and version tracking table
+sudo mysql <<MYSQL_SCRIPT
+CREATE DATABASE ${db_name};
+CREATE USER '${db_user}'@'localhost' IDENTIFIED BY '${db_pass}';
+GRANT ALL PRIVILEGES ON ${db_name}.* TO '${db_user}'@'localhost';
+FLUSH PRIVILEGES;
+USE ${db_name};
+CREATE TABLE schema_version (
+    version VARCHAR(10) NOT NULL,
+    created_at DATETIME NOT NULL
+);
+INSERT INTO schema_version (version, created_at) VALUES ('0.0.1', NOW());
+MYSQL_SCRIPT
+
+# 4. Set ownership
+sudo chown -R www-data:www-data "$doc_root"
+
+# 5. Set permissions
+sudo chmod -R 775 "$doc_root"
+
+# 6. Enable new site
+sudo a2ensite "${domain}.conf"
+
+# 7. Restart Apache
+sudo systemctl restart apache2
+
+# 8. Generate Configuration Report
+cat <<EOL > "${domain}_config_report.txt"
+Configuration Report for ${domain}
+
+1. Apache Configuration:
+   - Config file: ${config_file}
+   - Document root: ${doc_root}
+
+2. MySQL Configuration:
+   - Database name: ${db_name}
+   - Database user: ${db_user}
+   - Database password: ${db_pass}
+   - Version tracking table: version_info
+   - Initial version: 0.0.1
+
+3. Permissions:
+   - Owner: www-data:www-data
+   - Permissions: 775
+
+4. Files created:
+   - ${doc_root}/index.php (Placeholder page with site info and DB connectivity check)
+
+5. Apache site enabled and restarted.
+
+Please store this information securely for future reference.
+EOL
+
+echo "Website setup complete. Configuration report saved to ${domain}_config_report.txt"
+
+# Display the report
+cat "${domain}_config_report.txt"
