@@ -1,0 +1,6 @@
+$ sudo apt-get install python-pip
+$ pip install virtualenv
+$ virtualenv --version
+$ virtualenv virtualenv_name
+$ source virtualenv_name/bin/activate
+$ deactivate
